@@ -10,6 +10,7 @@ contract BookLibrary {
     string image;
     string isbn;
     string date;
+    string summary;
   }
 
   uint public booksLength = 0;
@@ -19,14 +20,16 @@ contract BookLibrary {
     string memory _name,
     string memory _image,
     string memory _isbn, 
-    string memory _date
+    string memory _date,
+    string memory _summary
   ) external {
     books[booksLength] = Book(
       tx.origin,
       _name,
       _image,
       _isbn,
-      _date
+      _date,
+      _summary
     );
     booksLength++;
   }
@@ -36,6 +39,7 @@ contract BookLibrary {
     string memory, 
     string memory, 
     string memory, 
+    string memory,
     string memory
   ) {
     Book storage book = books[_index];
@@ -44,7 +48,8 @@ contract BookLibrary {
       book.name,
       book.image,
       book.isbn,
-      book.date
+      book.date,
+      book.summary
     );
   }
 }
