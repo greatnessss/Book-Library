@@ -50,7 +50,7 @@ const getBooks = async function() {
     
       resolve({
         index: i,
-        owner: p[0],
+        user: p[0],
         title: p[1],
         image: p[2],
         isbn: p[3],
@@ -66,7 +66,7 @@ const getBooks = async function() {
 const uploadHelper = async (_file) => {
   try {
     const file = await ipfsClient.add(_file);
-    console.log("File", file);
+    // console logging of file removed - I assume this was to check if ipfsClient operation was done.
     const path = `https://ipfs.infura.io/ipfs/${file.path}`;
   
     return path;
@@ -76,25 +76,38 @@ const uploadHelper = async (_file) => {
   }
 };
 
+// Adding a current-date function hence not user-defined. 
+
+const dateNow = () => {
+  let date = new Date();
+  const options = {year: "numeric", month: "long", day: "numeric"};
+  return date.toLocaleString(undefined, options);
+  
+}
+
 document
   .querySelector("#submit-book")
   .addEventListener("click", async (e) => {
+    let readableDate = dateNow();
     const selectedImage = document.getElementById("select-image").files[0];
     const ipfs_bookImage = await uploadHelper(selectedImage);
     const bookParams = [
       document.getElementById("input-title").value,
       ipfs_bookImage,
       document.getElementById("input-isbn").value,
-      document.getElementById("input-date").value
+
+      // Adding a human-readable date to the list of parameters
+      readableDate
     ]
 
     bookNotification(`⌛ Adding "${bookParams[0]}"...`)
     try {
-      await contract.methods.addBook(...bookParams).send({
-        from: kit.defaultAccount
-      }).then(() => {
+      await contract.methods.addBook(...bookParams)
+      .send({from: kit.defaultAccount})
+      .then(() => {
         bookNotification(`🎉 You successfully added "${bookParams[0]}".`)
-        getBooks()
+        getBooks();
+        bookNotificationOff(); // remove notification after books are rendered.
       }).catch((err) => {
         bookNotification(`⚠️ ${err}.`)
       })
