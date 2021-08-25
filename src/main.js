@@ -4,7 +4,7 @@ import { newKitFromWeb3 } from '@celo/contractkit'
 import Web3 from "@celo/contractkit/node_modules/web3"
 import booklibraryAbi from '../contract/booklibrary.abi.json'
 
-const BooklibraryContractAddress = "0xE0531c98Da1173Cf7ad7dD8E5E9C968169d42e43";
+const BooklibraryContractAddress = "0x0D5690Bd51A71EFcED3c61F69e792a8C7C046f59";
 const ipfsClient = create({
   url: 'https://ipfs.infura.io:5001/api/v0'
 })
@@ -54,7 +54,8 @@ const getBooks = async function() {
         title: p[1],
         image: p[2],
         isbn: p[3],
-        date: p[4]
+        date: p[4],
+        summary: p[5]
       })
     })
     _books.push(_book)
@@ -66,7 +67,6 @@ const getBooks = async function() {
 const uploadHelper = async (_file) => {
   try {
     const file = await ipfsClient.add(_file);
-    console.log("File", file);
     const path = `https://ipfs.infura.io/ipfs/${file.path}`;
   
     return path;
@@ -85,19 +85,18 @@ document
       document.getElementById("input-title").value,
       ipfs_bookImage,
       document.getElementById("input-isbn").value,
-      document.getElementById("input-date").value
+      document.getElementById("input-date").value,
+      document.getElementById("input-summary").value,
     ]
 
     bookNotification(`⌛ Adding "${bookParams[0]}"...`)
     try {
       await contract.methods.addBook(...bookParams).send({
         from: kit.defaultAccount
-      }).then(() => {
+      })
         bookNotification(`🎉 You successfully added "${bookParams[0]}".`)
         getBooks()
-      }).catch((err) => {
-        bookNotification(`⚠️ ${err}.`)
-      })
+      
     } catch (error) {
       bookNotification(`⚠️ ${error}.`)
     }
