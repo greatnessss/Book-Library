@@ -4,6 +4,12 @@ pragma solidity >=0.7.0 < 0.9.0;
 
 contract BookLibrary {
 
+  address internal contractOwner;
+
+  constructor () {
+    contractOwner = payable(msg.sender);
+  }
+
   struct Book {
     address user;
     string name;
@@ -22,12 +28,15 @@ contract BookLibrary {
     string memory _date
   ) external {
     books[booksLength] = Book(
-      tx.origin,
+      // tx.origin usage is not advised.
+      // it refers only to the first initiator of the contract which is the owner.
+      msg.sender,
       _name,
       _image,
       _isbn,
       _date
     );
+
     booksLength++;
   }
 
@@ -46,5 +55,15 @@ contract BookLibrary {
       book.isbn,
       book.date
     );
+  }
+
+  modifier onlyOwner () {
+    require(msg.sender == contractOwner, "You do not have admin rights");
+    _;
+  }
+
+  function delBook(uint _index) onlyOwner() public returns(bool) {
+    delete books[_index];
+    return true;
   }
 }
